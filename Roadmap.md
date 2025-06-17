@@ -647,14 +647,6 @@ A comprehensive French learning application built with React that provides a gam
 ## Implementation Guide
 
 ### Getting Started
-
-1. **Prerequisites**
-   - Node.js 18+ and npm/yarn
-   - Git version control
-   - Supabase account and project
-   - Groq API access
-   - Domain and hosting setup
-
 2. **Initial Setup Process**
    - Clone repository and install dependencies
    - Configure environment variables
