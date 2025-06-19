@@ -1,5 +1,4 @@
 //TODO: make it prettier
-//put icons on the tabs
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs } from "expo-router";
