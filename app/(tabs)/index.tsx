@@ -175,31 +175,21 @@ export default function Index() {
 	const getUnifiedUserStats = () => {
 		const totalXP = userProgress?.totalXP || user?.totalXP || 0;
 
-		// Level calculation: Level 1 = 0-199 XP, Level 2 = 200-399 XP, etc.
-		const level = Math.floor(totalXP / 200) + 1;
+		// Level calculation: Level 1 = 0-999 XP, Level 2 = 1000-1999 XP, etc. (1000 XP per level)
+		const level = Math.floor(totalXP / 1000) + 1;
 
 		// Current level progress (XP within current level)
-		const currentLevelXP = totalXP % 200; // For display: prioritize userProgress data over user hook data
-		const displayLevel = userProgress?.level || level;
+		const currentLevelXP = totalXP % 1000;
 
-		// Debug logging
-		console.log("Debug User Stats:", {
-			totalXP,
-			level,
-			displayLevel,
-			currentLevelXP,
-			userLevel: user?.level,
-			userProgressLevel: userProgress?.level,
-			userTotalXP: user?.totalXP,
-			userProgressTotalXP: userProgress?.totalXP,
-		});
+		// For display: prioritize userProgress data over user hook data
+		const displayLevel = userProgress?.level || level;
 
 		return {
 			level: displayLevel,
 			totalXP,
 			streak: userProgress?.streak || user?.streak || 0,
 			currentXP: currentLevelXP,
-			xpToNextLevel: 200, // Total XP needed for next level
+			xpToNextLevel: 1000, // Total XP needed for next level
 			completedChapters: Object.keys(userProgress?.chaptersProgress || {})
 				.length, // Count chapters that have been unlocked/started
 		};
@@ -243,7 +233,6 @@ export default function Index() {
 				completed: true,
 			});
 		}
-
 		// Chapter achievements
 		if (userStats.completedChapters >= 3) {
 			achievements.push({
@@ -256,7 +245,9 @@ export default function Index() {
 			achievements.push({
 				icon: "📖",
 				title: "First Steps",
-				description: `${userStats.completedChapters} chapter completed!`,
+				description: `${userStats.completedChapters} chapter${
+					userStats.completedChapters === 1 ? "" : "s"
+				} completed!`,
 				completed: true,
 			});
 		}
@@ -567,28 +558,32 @@ export default function Index() {
 								activeOpacity={0.8}
 							>
 								<Text style={styles.achievementIcon}>{achievement.icon}</Text>
-								<Text
-									style={[
-										styles.achievementTitle,
-										{
-											color: achievement.completed ? colors.text : colors.icon,
-										},
-									]}
-								>
-									{achievement.title}
-								</Text>
-								<Text
-									style={[
-										styles.achievementDescription,
-										{
-											color: achievement.completed
-												? colors.icon
-												: colors.tabIconDefault,
-										},
-									]}
-								>
-									{achievement.description}
-								</Text>
+								<View style={styles.achievementDetails}>
+									<Text
+										style={[
+											styles.achievementTitle,
+											{
+												color: achievement.completed
+													? colors.text
+													: colors.icon,
+											},
+										]}
+									>
+										{achievement.title}
+									</Text>
+									<Text
+										style={[
+											styles.achievementDescription,
+											{
+												color: achievement.completed
+													? colors.icon
+													: colors.tabIconDefault,
+											},
+										]}
+									>
+										{achievement.description}
+									</Text>
+								</View>
 							</TouchableOpacity>
 						))}{" "}
 					</View>
@@ -807,10 +802,11 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		flexWrap: "wrap",
+		gap: 10,
 	},
 	achievementCard: {
 		flexDirection: "row",
-		alignItems: "center",
+		alignItems: "flex-start",
 		padding: 15,
 		borderRadius: 10,
 		elevation: 2,
@@ -819,23 +815,28 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.1,
 		shadowRadius: 4,
 		flex: 1,
-		margin: 5,
+		minWidth: "45%",
+		maxWidth: "48%",
 	},
 	achievementIcon: {
 		fontSize: 24,
-		marginRight: 10,
+		marginRight: 12,
+		marginTop: 2,
 	},
 	achievementDetails: {
 		flex: 1,
+		flexShrink: 1,
 	},
 	achievementTitle: {
-		fontSize: 16,
+		fontSize: 14,
 		fontWeight: "bold",
-		marginBottom: 5,
+		marginBottom: 4,
+		flexWrap: "wrap",
 	},
 	achievementDescription: {
-		fontSize: 14,
-		color: "#666",
+		fontSize: 12,
+		lineHeight: 16,
+		flexWrap: "wrap",
 	},
 	noAchievements: {
 		fontSize: 14,

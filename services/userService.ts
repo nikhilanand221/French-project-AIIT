@@ -1,341 +1,319 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DailyChallenge, GameStats, User, UserProgress } from "../types/Game";
 
-const USER_STORAGE_KEY = "french_app_user";
-const PROGRESS_STORAGE_KEY = "french_app_progress";
-const STATS_STORAGE_KEY = "french_app_stats";
-const CHALLENGES_STORAGE_KEY = "french_app_challenges";
+export interface User {
+	id: string;
+	name: string;
+	email: string;
+	totalXP: number;
+	level: number;
+	streak: number;
+	lastActiveDate: Date;
+	preferences: {
+		notifications: boolean;
+		sounds: boolean;
+		language: string;
+	};
+}
 
-// Default user data
-const createDefaultUser = (): User => ({
-	id: Date.now().toString(),
-	name: "French Learner",
-	level: 1,
-	totalXP: 0,
-	currentXP: 0,
-	xpToNextLevel: 100,
-	streak: 0,
-	longestStreak: 0,
-	badges: [],
-	achievements: [],
-	createdAt: new Date(),
-	lastLogin: new Date(),
-});
+export interface Progress {
+	userId: string;
+	currentChapter: number;
+	totalXP: number;
+	streak: number;
+	chaptersCompleted: number;
+	lessonsCompleted: number;
+	lastActiveDate: Date;
+	chapterProgress: ChapterProgress[];
+}
 
-const createDefaultProgress = (): UserProgress => ({
-	chapterProgress: Array.from({ length: 5 }, (_, i) => ({
-		chapterId: i + 1,
-		completed: false,
-		progress: 0,
-		lessonsCompleted: 0,
-		totalLessons: 5, // Default lessons per chapter
-		xpEarned: 0,
-		badges: [],
-		lastAccessed: new Date(),
-		bestScore: 0,
-	})),
-	currentChapter: 1,
-	overallProgress: 0,
-	skillLevels: [
-		{ skill: "vocabulary", level: 1, xp: 0, xpToNext: 50 },
-		{ skill: "grammar", level: 1, xp: 0, xpToNext: 50 },
-		{ skill: "pronunciation", level: 1, xp: 0, xpToNext: 50 },
-		{ skill: "listening", level: 1, xp: 0, xpToNext: 50 },
-		{ skill: "conversation", level: 1, xp: 0, xpToNext: 50 },
-	],
-	weeklyGoals: [
-		{
-			id: "weekly_lessons",
-			title: "Complete 5 lessons",
-			description: "Finish 5 lessons this week",
-			progress: 0,
-			target: 5,
-			completed: false,
-			xpReward: 50,
-		},
-		{
-			id: "weekly_time",
-			title: "Study 1 hour daily",
-			description: "Maintain daily study habit",
-			progress: 0,
-			target: 7,
-			completed: false,
-			xpReward: 30,
-		},
-	],
-});
+export interface ChapterProgress {
+	chapterId: number;
+	completed: boolean;
+	score: number;
+	timeSpent: number;
+	unlockedAt: Date;
+	completedAt?: Date;
+}
 
-const createDefaultStats = (): GameStats => ({
-	lessonsCompleted: 0,
-	perfectScores: 0,
-	totalTimeStudied: 0,
-	averageAccuracy: 0,
-	activitiesCompleted: 0,
-	chaptersCompleted: 0,
-});
+export interface Challenge {
+	id: string;
+	title: string;
+	description: string;
+	type: "daily" | "weekly" | "special";
+	progress: number;
+	maxProgress: number;
+	xpReward: number;
+	completed: boolean;
+	completedAt?: Date;
+	expiresAt: Date;
+}
 
 export class UserService {
-	// User management
-	static async getUser(): Promise<User> {
+	private static readonly STORAGE_KEYS = {
+		USER: "user_data",
+		PROGRESS: "user_progress",
+		CHALLENGES: "user_challenges",
+	};
+
+	// User Management
+	static async getUser(): Promise<User | null> {
 		try {
-			const userData = await AsyncStorage.getItem(USER_STORAGE_KEY);
+			const userData = await AsyncStorage.getItem(this.STORAGE_KEYS.USER);
 			if (userData) {
 				const user = JSON.parse(userData);
-				// Update last login
-				user.lastLogin = new Date();
-				await this.saveUser(user);
-				return user;
+				return {
+					...user,
+					lastActiveDate: new Date(user.lastActiveDate),
+				};
 			}
-			return createDefaultUser();
+			return null;
 		} catch (error) {
 			console.error("Error getting user:", error);
-			return createDefaultUser();
+			return null;
 		}
 	}
 
-	static async saveUser(user: User): Promise<void> {
+	static async createUser(userData: Omit<User, "id">): Promise<User> {
 		try {
-			await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+			const user: User = {
+				id: Date.now().toString(),
+				...userData,
+				lastActiveDate: new Date(),
+			};
+			await AsyncStorage.setItem(this.STORAGE_KEYS.USER, JSON.stringify(user));
+			return user;
 		} catch (error) {
-			console.error("Error saving user:", error);
+			console.error("Error creating user:", error);
+			throw error;
 		}
 	}
 
-	static async updateUserName(name: string): Promise<void> {
-		const user = await this.getUser();
-		user.name = name;
-		await this.saveUser(user);
-	}
-
-	// XP and level management
-	static async addXP(amount: number): Promise<User> {
-		const user = await this.getUser();
-		user.totalXP += amount;
-		user.currentXP += amount;
-
-		// Check for level up
-		while (user.currentXP >= user.xpToNextLevel) {
-			user.currentXP -= user.xpToNextLevel;
-			user.level++;
-			user.xpToNextLevel = this.calculateXPForNextLevel(user.level);
-		}
-
-		await this.saveUser(user);
-		return user;
-	}
-
-	static calculateXPForNextLevel(level: number): number {
-		// XP required increases with each level
-		return Math.floor(100 * Math.pow(1.2, level - 1));
-	}
-
-	// Progress management
-	static async getProgress(): Promise<UserProgress> {
+	static async updateUser(
+		userId: string,
+		updates: Partial<User>
+	): Promise<User> {
 		try {
-			const progressData = await AsyncStorage.getItem(PROGRESS_STORAGE_KEY);
-			if (progressData) {
-				return JSON.parse(progressData);
+			const currentUser = await this.getUser();
+			if (!currentUser || currentUser.id !== userId) {
+				throw new Error("User not found");
 			}
-			return createDefaultProgress();
-		} catch (error) {
-			console.error("Error getting progress:", error);
-			return createDefaultProgress();
-		}
-	}
 
-	static async saveProgress(progress: UserProgress): Promise<void> {
-		try {
-			await AsyncStorage.setItem(
-				PROGRESS_STORAGE_KEY,
-				JSON.stringify(progress)
-			);
-		} catch (error) {
-			console.error("Error saving progress:", error);
-		}
-	}
-
-	static async updateChapterProgress(
-		chapterId: number,
-		progressUpdate: Partial<UserProgress["chapterProgress"][0]>
-	): Promise<void> {
-		const progress = await this.getProgress();
-		const chapterIndex = progress.chapterProgress.findIndex(
-			(c) => c.chapterId === chapterId
-		);
-
-		if (chapterIndex !== -1) {
-			progress.chapterProgress[chapterIndex] = {
-				...progress.chapterProgress[chapterIndex],
-				...progressUpdate,
-				lastAccessed: new Date(),
+			const updatedUser: User = {
+				...currentUser,
+				...updates,
+				lastActiveDate: new Date(),
 			};
 
-			// Update overall progress
-			const totalProgress = progress.chapterProgress.reduce(
-				(sum, ch) => sum + ch.progress,
-				0
-			);
-			progress.overallProgress = Math.floor(
-				totalProgress / progress.chapterProgress.length
-			);
-
-			await this.saveProgress(progress);
-		}
-	}
-
-	// Stats management
-	static async getStats(): Promise<GameStats> {
-		try {
-			const statsData = await AsyncStorage.getItem(STATS_STORAGE_KEY);
-			if (statsData) {
-				return JSON.parse(statsData);
-			}
-			return createDefaultStats();
-		} catch (error) {
-			console.error("Error getting stats:", error);
-			return createDefaultStats();
-		}
-	}
-
-	static async updateStats(statsUpdate: Partial<GameStats>): Promise<void> {
-		try {
-			const stats = await this.getStats();
-			const updatedStats = { ...stats, ...statsUpdate };
 			await AsyncStorage.setItem(
-				STATS_STORAGE_KEY,
-				JSON.stringify(updatedStats)
+				this.STORAGE_KEYS.USER,
+				JSON.stringify(updatedUser)
 			);
+			return updatedUser;
 		} catch (error) {
-			console.error("Error updating stats:", error);
+			console.error("Error updating user:", error);
+			throw error;
 		}
 	}
 
-	// Streak management
-	static async updateStreak(): Promise<void> {
-		const user = await this.getUser();
-		const today = new Date().toDateString();
-		const lastLogin = new Date(user.lastLogin).toDateString();
-
-		if (today !== lastLogin) {
-			const yesterday = new Date();
-			yesterday.setDate(yesterday.getDate() - 1);
-
-			if (yesterday.toDateString() === lastLogin) {
-				// Consecutive day
-				user.streak++;
-				if (user.streak > user.longestStreak) {
-					user.longestStreak = user.streak;
-				}
-			} else {
-				// Streak broken
-				user.streak = 1;
-			}
-
-			await this.saveUser(user);
-		}
-	}
-
-	// Daily challenges
-	static async getDailyChallenges(): Promise<DailyChallenge[]> {
+	// Progress Management
+	static async getProgress(): Promise<Progress | null> {
 		try {
-			const challengesData = await AsyncStorage.getItem(CHALLENGES_STORAGE_KEY);
+			const progressData = await AsyncStorage.getItem(
+				this.STORAGE_KEYS.PROGRESS
+			);
+			if (progressData) {
+				const progress = JSON.parse(progressData);
+				return {
+					...progress,
+					lastActiveDate: new Date(progress.lastActiveDate),
+					chapterProgress: progress.chapterProgress.map((cp: any) => ({
+						...cp,
+						unlockedAt: new Date(cp.unlockedAt),
+						completedAt: cp.completedAt ? new Date(cp.completedAt) : undefined,
+					})),
+				};
+			}
+			return null;
+		} catch (error) {
+			console.error("Error getting progress:", error);
+			return null;
+		}
+	}
+
+	static async updateProgress(
+		userId: string,
+		updates: Partial<Progress>
+	): Promise<Progress> {
+		try {
+			const currentProgress = await this.getProgress();
+			const updatedProgress: Progress = {
+				userId,
+				currentChapter: 1,
+				totalXP: 0,
+				streak: 0,
+				chaptersCompleted: 0,
+				lessonsCompleted: 0,
+				lastActiveDate: new Date(),
+				chapterProgress: [],
+				...currentProgress,
+				...updates,
+			};
+
+			await AsyncStorage.setItem(
+				this.STORAGE_KEYS.PROGRESS,
+				JSON.stringify(updatedProgress)
+			);
+			return updatedProgress;
+		} catch (error) {
+			console.error("Error updating progress:", error);
+			throw error;
+		}
+	}
+
+	// Challenge Management
+	static async getChallenges(): Promise<Challenge[]> {
+		try {
+			const challengesData = await AsyncStorage.getItem(
+				this.STORAGE_KEYS.CHALLENGES
+			);
 			if (challengesData) {
 				const challenges = JSON.parse(challengesData);
-				// Filter out expired challenges
-				const validChallenges = challenges.filter(
-					(c: DailyChallenge) => new Date(c.expiresAt) > new Date()
-				);
-				return validChallenges;
+				return challenges.map((challenge: any) => ({
+					...challenge,
+					completedAt: challenge.completedAt
+						? new Date(challenge.completedAt)
+						: undefined,
+					expiresAt: new Date(challenge.expiresAt),
+				}));
 			}
 			return this.generateDailyChallenges();
 		} catch (error) {
-			console.error("Error getting daily challenges:", error);
+			console.error("Error getting challenges:", error);
 			return [];
 		}
 	}
 
-	static generateDailyChallenges(): DailyChallenge[] {
-		const tomorrow = new Date();
+	static async updateChallengeProgress(
+		challengeId: string,
+		progress: number
+	): Promise<Challenge[]> {
+		try {
+			const challenges = await this.getChallenges();
+			const updatedChallenges = challenges.map((challenge) => {
+				if (challenge.id === challengeId) {
+					const newProgress = Math.min(
+						challenge.progress + progress,
+						challenge.maxProgress
+					);
+					return {
+						...challenge,
+						progress: newProgress,
+						completed: newProgress >= challenge.maxProgress,
+						completedAt:
+							newProgress >= challenge.maxProgress ? new Date() : undefined,
+					};
+				}
+				return challenge;
+			});
+
+			await AsyncStorage.setItem(
+				this.STORAGE_KEYS.CHALLENGES,
+				JSON.stringify(updatedChallenges)
+			);
+			return updatedChallenges;
+		} catch (error) {
+			console.error("Error updating challenge progress:", error);
+			throw error;
+		}
+	}
+
+	static async generateDailyChallenges(): Promise<Challenge[]> {
+		const today = new Date();
+		const tomorrow = new Date(today);
 		tomorrow.setDate(tomorrow.getDate() + 1);
 		tomorrow.setHours(0, 0, 0, 0);
 
-		const challenges: DailyChallenge[] = [
+		const dailyChallenges: Challenge[] = [
 			{
-				id: "daily_lesson",
-				title: "Complete a lesson",
-				description: "Finish any lesson today",
-				type: "complete_lessons",
-				progress: 0,
-				maxProgress: 1,
-				xpReward: 25,
-				completed: false,
-				expiresAt: tomorrow,
-			},
-			{
-				id: "daily_practice",
-				title: "Practice pronunciation",
-				description: "Complete 3 pronunciation exercises",
-				type: "practice_pronunciation",
+				id: `daily-${today.toDateString()}`,
+				title: "Daily Practice",
+				description: "Complete 3 practice activities",
+				type: "daily",
 				progress: 0,
 				maxProgress: 3,
-				xpReward: 20,
-				completed: false,
-				expiresAt: tomorrow,
-			},
-			{
-				id: "daily_flashcards",
-				title: "Flashcard streak",
-				description: "Review 10 flashcards",
-				type: "flashcard_streak",
-				progress: 0,
-				maxProgress: 10,
-				xpReward: 15,
+				xpReward: 50,
 				completed: false,
 				expiresAt: tomorrow,
 			},
 		];
 
-		AsyncStorage.setItem(CHALLENGES_STORAGE_KEY, JSON.stringify(challenges));
-		return challenges;
+		try {
+			await AsyncStorage.setItem(
+				this.STORAGE_KEYS.CHALLENGES,
+				JSON.stringify(dailyChallenges)
+			);
+		} catch (error) {
+			console.error("Error saving daily challenges:", error);
+		}
+
+		return dailyChallenges;
 	}
 
-	static async updateChallengeProgress(
-		challengeId: string,
-		progressIncrement: number = 1
-	): Promise<void> {
-		const challenges = await this.getDailyChallenges();
-		const challenge = challenges.find((c) => c.id === challengeId);
-
-		if (challenge && !challenge.completed) {
-			challenge.progress = Math.min(
-				challenge.progress + progressIncrement,
-				challenge.maxProgress
-			);
-
-			if (challenge.progress >= challenge.maxProgress) {
-				challenge.completed = true;
-				// Award XP
-				await this.addXP(challenge.xpReward);
-			}
-
-			await AsyncStorage.setItem(
-				CHALLENGES_STORAGE_KEY,
-				JSON.stringify(challenges)
-			);
+	// Utility Methods
+	static async clearAllData(): Promise<void> {
+		try {
+			await AsyncStorage.multiRemove([
+				this.STORAGE_KEYS.USER,
+				this.STORAGE_KEYS.PROGRESS,
+				this.STORAGE_KEYS.CHALLENGES,
+			]);
+		} catch (error) {
+			console.error("Error clearing data:", error);
+			throw error;
 		}
 	}
 
-	// Reset data (for development/testing)
-	static async resetAllData(): Promise<void> {
+	static async initializeDefaultData(): Promise<void> {
 		try {
-			await AsyncStorage.multiRemove([
-				USER_STORAGE_KEY,
-				PROGRESS_STORAGE_KEY,
-				STATS_STORAGE_KEY,
-				CHALLENGES_STORAGE_KEY,
-			]);
+			const user = await this.getUser();
+			if (!user) {
+				await this.createUser({
+					name: "French Learner",
+					email: "",
+					totalXP: 0,
+					level: 1,
+					streak: 0,
+					lastActiveDate: new Date(),
+					preferences: {
+						notifications: true,
+						sounds: true,
+						language: "en",
+					},
+				});
+			}
+
+			const progress = await this.getProgress();
+			if (!progress) {
+				await this.updateProgress("default", {
+					currentChapter: 1,
+					totalXP: 0,
+					streak: 0,
+					chaptersCompleted: 0,
+					lessonsCompleted: 0,
+					chapterProgress: [
+						{
+							chapterId: 1,
+							completed: false,
+							score: 0,
+							timeSpent: 0,
+							unlockedAt: new Date(),
+						},
+					],
+				});
+			}
 		} catch (error) {
-			console.error("Error resetting data:", error);
+			console.error("Error initializing default data:", error);
+			throw error;
 		}
 	}
 }

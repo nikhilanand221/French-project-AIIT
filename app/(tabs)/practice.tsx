@@ -15,7 +15,6 @@ import { useProgress as useProgressContext } from "../../contexts/ProgressContex
 import { useColorScheme } from "../../hooks/useColorScheme";
 import { useGameification } from "../../hooks/useGameification";
 import { useProgress } from "../../hooks/useProgress";
-import { useUser } from "../../hooks/useUser";
 
 const practiceActivities = [
 	{
@@ -83,11 +82,11 @@ const practiceActivities = [
 export default function Practice() {
 	const router = useRouter();
 	const colorScheme = useColorScheme();
-	const colors = Colors[colorScheme ?? "light"]; // Data hooks
-	const { loading: userLoading } = useUser();
+	const colors = Colors[colorScheme ?? "light"]; // Data hooks	const { loading: userLoading } = useUser();
 	const { loading: progressLoading, refresh: refreshProgress } = useProgress();
 	const { loading: gameLoading } = useGameification();
-	const { userProgress, updateStreak, loadProgress } = useProgressContext(); // State for real-time updates
+	const { userProgress, updateStreak, loadProgress } = useProgressContext();
+	// State for real-time updates
 	const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
 	const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -192,9 +191,7 @@ export default function Practice() {
 				},
 			]
 		);
-	};
-
-	// Start specific activity
+	}; // Start specific activity
 	const startActivity = (activity: any) => {
 		// Navigate to specific activity implementation
 		switch (activity.id) {
@@ -216,14 +213,14 @@ export default function Practice() {
 					"Listening practice is being developed. Check back soon!",
 					[{ text: "OK", style: "default" }]
 				);
-				break;
+				return;
 			case 6: // Speed Challenge
 				Alert.alert(
 					"Coming Soon! ⚡",
 					"Speed Challenge is being developed. Check back soon!",
 					[{ text: "OK", style: "default" }]
 				);
-				break;
+				return;
 			default:
 				Alert.alert(
 					"Activity Started! 🎯",
@@ -231,8 +228,6 @@ export default function Practice() {
 					[{ text: "Let's Go! 🚀", style: "default" }]
 				);
 		}
-
-		// Note: Daily challenge progress is automatically calculated from completed activities
 	};
 
 	// Handle daily challenge
@@ -263,7 +258,7 @@ export default function Practice() {
 		}
 	};
 
-	if (userLoading || progressLoading || gameLoading) {
+	if (progressLoading || gameLoading) {
 		return (
 			<SafeAreaView
 				style={[styles.container, { backgroundColor: colors.background }]}

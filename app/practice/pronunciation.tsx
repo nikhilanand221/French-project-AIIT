@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	Alert,
 	ScrollView,
@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../../constants/Colors";
 import { useProgress as useProgressContext } from "../../contexts/ProgressContext";
 import { useColorScheme } from "../../hooks/useColorScheme";
+import { useGameification } from "../../hooks/useGameification";
 
 // Pronunciation practice data
 const pronunciationWords = [
@@ -78,6 +79,7 @@ export default function Pronunciation() {
 	const colorScheme = useColorScheme();
 	const colors = Colors[colorScheme ?? "light"];
 	const { addXP, updateStreak } = useProgressContext();
+	const { challenges, updateChallengeProgress } = useGameification();
 
 	const [currentWordIndex, setCurrentWordIndex] = useState(0);
 	const [score, setScore] = useState({ practiced: 0, total: 0 });
@@ -126,7 +128,6 @@ export default function Pronunciation() {
 			completeSession(newScore);
 		}
 	};
-
 	const completeSession = async (finalScore: {
 		practiced: number;
 		total: number;
@@ -138,6 +139,11 @@ export default function Pronunciation() {
 		try {
 			await addXP(xpEarned);
 			await updateStreak();
+
+			// Update daily challenge progress (assuming the daily challenge is about completing practice activities)
+			if (challenges.length > 0 && !challenges[0].completed) {
+				await updateChallengeProgress(challenges[0].id, 1);
+			}
 		} catch (error) {
 			console.error("Error updating progress:", error);
 		}
@@ -148,7 +154,11 @@ export default function Pronunciation() {
 				finalScore.total
 			} words.\n\nCompletion Rate: ${completionRate.toFixed(
 				1
-			)}%\nXP Earned: +${xpEarned}`,
+			)}%\nXP Earned: +${xpEarned}${
+				challenges.length > 0 && !challenges[0].completed
+					? "\n🎯 Daily Challenge Progress Updated!"
+					: ""
+			}`,
 			[
 				{ text: "Practice Again", onPress: () => restartSession() },
 				{ text: "Back to Practice Arena", onPress: () => router.back() },

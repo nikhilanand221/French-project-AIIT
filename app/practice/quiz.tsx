@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	Alert,
 	Animated,
@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../../constants/Colors";
 import { useProgress as useProgressContext } from "../../contexts/ProgressContext";
 import { useColorScheme } from "../../hooks/useColorScheme";
+import { useGameification } from "../../hooks/useGameification";
 
 // Quiz question data
 const quizQuestions = [
@@ -93,6 +94,7 @@ export default function QuickQuiz() {
 	const colorScheme = useColorScheme();
 	const colors = Colors[colorScheme ?? "light"];
 	const { addXP, updateStreak } = useProgressContext();
+	const { challenges, updateChallengeProgress } = useGameification();
 
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -182,7 +184,6 @@ export default function QuickQuiz() {
 		setTimeLeft(15);
 		resultAnimation.setValue(0);
 	};
-
 	const completeQuiz = async (finalScore: {
 		correct: number;
 		total: number;
@@ -194,6 +195,11 @@ export default function QuickQuiz() {
 		try {
 			await addXP(xpEarned);
 			await updateStreak();
+
+			// Update daily challenge progress (assuming the daily challenge is about completing practice activities)
+			if (challenges.length > 0 && !challenges[0].completed) {
+				await updateChallengeProgress(challenges[0].id, 1);
+			}
 		} catch (error) {
 			console.error("Error updating progress:", error);
 		}
@@ -202,7 +208,11 @@ export default function QuickQuiz() {
 			"Quiz Complete! 🧠",
 			`Great job! You scored ${finalScore.correct} out of ${
 				finalScore.total
-			}.\n\nAccuracy: ${accuracy.toFixed(1)}%\nXP Earned: +${xpEarned}`,
+			}.\n\nAccuracy: ${accuracy.toFixed(1)}%\nXP Earned: +${xpEarned}${
+				challenges.length > 0 && !challenges[0].completed
+					? "\n🎯 Daily Challenge Progress Updated!"
+					: ""
+			}`,
 			[
 				{ text: "Try Again", onPress: () => restartQuiz() },
 				{ text: "Back to Practice Arena", onPress: () => router.back() },
