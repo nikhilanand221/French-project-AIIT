@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	Alert,
 	Modal,
@@ -16,13 +16,13 @@ import { Colors } from "../../constants/Colors";
 import { LessonProgress, useProgress } from "../../contexts/ProgressContext";
 import { useColorScheme } from "../../hooks/useColorScheme";
 import { useNotifications } from "../../hooks/useNotifications";
+import { useSounds } from "../../hooks/useSounds";
 import NotificationService from "../../services/NotificationService";
 
 // User Settings Interface
 interface UserSettings {
 	notifications: boolean;
 	soundEffects: boolean;
-	shareProgress: boolean;
 	userName: string;
 	avatar: string;
 }
@@ -98,7 +98,6 @@ const achievementsList = [
 const defaultSettings: UserSettings = {
 	notifications: true,
 	soundEffects: true,
-	shareProgress: false,
 	userName: "Alex Dubois",
 	avatar: "👤",
 };
@@ -107,7 +106,6 @@ export default function Profile() {
 	const colorScheme = useColorScheme();
 	const colors = Colors[colorScheme ?? "light"];
 	const { userProgress } = useProgress();
-
 	// Initialize notifications
 	const {
 		hasPermissions,
@@ -115,6 +113,8 @@ export default function Profile() {
 		requestPermissions,
 		updateNotificationSettings,
 	} = useNotifications();
+	// Initialize sounds
+	const { updateSoundSettings, playButtonClick } = useSounds();
 
 	// State for user settings and UI
 	const [userSettings, setUserSettings] =
@@ -330,11 +330,26 @@ export default function Profile() {
 			}
 		}
 
+		// Handle sound effects settings
+		if (setting === "soundEffects") {
+			await updateSoundSettings({
+				enabled: newSettings.soundEffects,
+			});
+
+			// Play a test sound if enabling
+			if (newSettings.soundEffects) {
+				await playButtonClick();
+			}
+		}
+
+		// Play button click sound for all toggles (if sound is enabled)
+		if (setting !== "soundEffects") {
+			await playButtonClick();
+		}
 		// Show feedback to user
 		const settingDisplayNames = {
 			notifications: "Notifications",
 			soundEffects: "Sound Effects",
-			shareProgress: "Share Progress",
 			userName: "User Name",
 			avatar: "Avatar",
 		};
@@ -388,27 +403,6 @@ export default function Profile() {
 				);
 			} catch (error) {
 				console.error("Error sending achievement notification:", error);
-			}
-		}
-	};
-
-	// Debug function to show scheduled notifications (development only)
-	const showScheduledNotifications = async () => {
-		if (__DEV__) {
-			try {
-				const scheduled = await NotificationService.getScheduledNotifications();
-				Alert.alert(
-					"Scheduled Notifications",
-					scheduled.length > 0
-						? scheduled
-								.map((n) => `${n.identifier}: ${n.content.title}`)
-								.join("\n")
-						: "No notifications scheduled",
-					[{ text: "OK" }]
-				);
-			} catch (error) {
-				console.error("Error retrieving scheduled notifications:", error);
-				Alert.alert("Error", "Could not retrieve scheduled notifications");
 			}
 		}
 	};
@@ -683,32 +677,6 @@ export default function Profile() {
 							}
 						/>
 					</TouchableOpacity>
-					<TouchableOpacity
-						style={[styles.settingItem, { backgroundColor: colors.card }]}
-						onPress={() => toggleSetting("shareProgress")}
-					>
-						<Text style={[styles.settingText, { color: colors.text }]}>
-							📊 Share Progress
-						</Text>
-						<Switch
-							value={userSettings.shareProgress}
-							onValueChange={() => toggleSetting("shareProgress")}
-							trackColor={{ false: colors.border, true: colors.primary }}
-							thumbColor={
-								userSettings.shareProgress ? colors.accent : colors.icon
-							}
-						/>
-					</TouchableOpacity>
-					{__DEV__ && (
-						<TouchableOpacity
-							style={[styles.settingItem, { backgroundColor: colors.card }]}
-							onPress={showScheduledNotifications}
-						>
-							<Text style={[styles.settingText, { color: colors.text }]}>
-								🔧 Show Scheduled Notifications (Debug)
-							</Text>
-						</TouchableOpacity>
-					)}
 				</View>
 			</ScrollView>
 

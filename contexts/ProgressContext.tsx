@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import NotificationService from "../services/NotificationService";
+import SoundService from "../services/SoundService";
 
 export interface LessonProgress {
 	lessonId: string;
@@ -119,7 +120,6 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 		};
 		setUserProgress(updatedProgress);
-
 		// Send notification for first-time lesson completion
 		if (
 			lessonProgress.completed &&
@@ -132,6 +132,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 						lessonProgress.score || 0
 					} points!`
 				);
+				// Play lesson completion sound
+				await SoundService.playLessonComplete();
 			} catch (error) {
 				console.error("Error sending lesson completion notification:", error);
 			}
@@ -147,6 +149,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 					"Perfect Score!",
 					"Excellent! You achieved a perfect score of 100%!"
 				);
+				// Play perfect score sound
+				await SoundService.playPerfectScore();
 			} catch (error) {
 				console.error("Error sending perfect score notification:", error);
 			}
@@ -163,7 +167,6 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 			},
 		};
 		setUserProgress(updatedProgress);
-
 		// Send notification for chapter completion
 		if (
 			chapterProgress.completedAt &&
@@ -174,6 +177,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 					"Chapter Completed!",
 					`Congratulations! You've completed Chapter ${chapterProgress.chapterId}!`
 				);
+				// Play chapter completion sound
+				await SoundService.playChapterComplete();
 			} catch (error) {
 				console.error("Error sending chapter completion notification:", error);
 			}
@@ -191,6 +196,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 						chapterProgress.assessmentScore || 0
 					}%!`
 				);
+				// Play achievement sound
+				await SoundService.playAchievementUnlock();
 			} catch (error) {
 				console.error("Error sending assessment notification:", error);
 			}
@@ -207,7 +214,6 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 			totalXP: newXP,
 			level: newLevel,
 		}));
-
 		// Send level up notification
 		if (newLevel > previousLevel) {
 			try {
@@ -215,6 +221,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 					`Level ${newLevel} Reached!`,
 					`Congratulations! You've reached level ${newLevel} in your French learning journey!`
 				);
+				// Play level up sound
+				await SoundService.playLevelUp();
 			} catch (error) {
 				console.error("Error sending level up notification:", error);
 			}
@@ -229,10 +237,21 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 						`${milestone} XP Milestone!`,
 						`Amazing! You've earned ${milestone} XP in your French studies!`
 					);
+					// Play achievement sound
+					await SoundService.playAchievementUnlock();
 				} catch (error) {
 					console.error("Error sending XP milestone notification:", error);
 				}
 				break; // Only send one milestone notification at a time
+			}
+		}
+
+		// Play XP gain sound for any XP increase
+		if (amount > 0) {
+			try {
+				await SoundService.playXPGain();
+			} catch (error) {
+				console.error("Error playing XP gain sound:", error);
 			}
 		}
 	};
@@ -267,7 +286,6 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 			streak: newStreak,
 			lastActiveDate: today,
 		}));
-
 		// Send streak milestone notifications
 		const streakMilestones = [3, 7, 14, 30, 50, 100];
 		for (const milestone of streakMilestones) {
@@ -277,6 +295,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({
 						`${milestone}-Day Streak!`,
 						`Fantastic! You've maintained a ${milestone}-day study streak! Keep it up!`
 					);
+					// Play streak milestone sound
+					await SoundService.playStreakMilestone();
 				} catch (error) {
 					console.error("Error sending streak notification:", error);
 				}

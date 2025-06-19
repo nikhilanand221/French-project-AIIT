@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useProgress } from "../contexts/ProgressContext";
 import { useNotifications } from "../hooks/useNotifications";
+import { useSounds } from "../hooks/useSounds";
 import NotificationService from "../services/NotificationService";
 
 /**
@@ -21,6 +22,18 @@ const NotificationTester: React.FC = () => {
 	const [customBody, setCustomBody] = useState("This is a test notification");
 	const { addXP, updateStreak } = useProgress();
 	const { hasPermissions, notificationSettings } = useNotifications();
+	const {
+		playButtonClick,
+		playCorrectAnswer,
+		playIncorrectAnswer,
+		playLessonComplete,
+		playAchievementUnlock,
+		playLevelUp,
+		playXPGain,
+		playPerfectScore,
+		playChapterComplete,
+		playStreakMilestone,
+	} = useSounds();
 
 	const testAchievementNotification = async () => {
 		try {
@@ -132,31 +145,70 @@ const NotificationTester: React.FC = () => {
 				<TouchableOpacity style={styles.button} onPress={testPermissionRequest}>
 					<Text style={styles.buttonText}>Request Permissions</Text>
 				</TouchableOpacity>
-
 				<TouchableOpacity
 					style={styles.button}
 					onPress={testAchievementNotification}
 				>
 					<Text style={styles.buttonText}>Test Achievement</Text>
 				</TouchableOpacity>
-
 				<TouchableOpacity style={styles.button} onPress={testStudyReminder}>
 					<Text style={styles.buttonText}>Test Study Reminder</Text>
 				</TouchableOpacity>
-
 				<TouchableOpacity style={styles.button} onPress={testXPMilestone}>
 					<Text style={styles.buttonText}>Test XP Milestone (+100 XP)</Text>
 				</TouchableOpacity>
-
 				<TouchableOpacity style={styles.button} onPress={testStreakMilestone}>
 					<Text style={styles.buttonText}>Test Streak Update</Text>
 				</TouchableOpacity>
-
 				<TouchableOpacity
 					style={styles.button}
 					onPress={testScheduledNotification}
 				>
 					<Text style={styles.buttonText}>Schedule Reminder</Text>
+				</TouchableOpacity>{" "}
+			</View>
+
+			{/* Sound Testing Section */}
+			<Text style={styles.sectionTitle}>🔊 Sound Effects Testing</Text>
+			<View style={styles.section}>
+				<TouchableOpacity style={styles.button} onPress={playButtonClick}>
+					<Text style={styles.buttonText}>Button Click</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity style={styles.button} onPress={playCorrectAnswer}>
+					<Text style={styles.buttonText}>Correct Answer</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity style={styles.button} onPress={playIncorrectAnswer}>
+					<Text style={styles.buttonText}>Incorrect Answer</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity style={styles.button} onPress={playLessonComplete}>
+					<Text style={styles.buttonText}>Lesson Complete</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity style={styles.button} onPress={playAchievementUnlock}>
+					<Text style={styles.buttonText}>Achievement Unlock</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity style={styles.button} onPress={playLevelUp}>
+					<Text style={styles.buttonText}>Level Up</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity style={styles.button} onPress={playXPGain}>
+					<Text style={styles.buttonText}>XP Gain</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity style={styles.button} onPress={playPerfectScore}>
+					<Text style={styles.buttonText}>Perfect Score</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity style={styles.button} onPress={playChapterComplete}>
+					<Text style={styles.buttonText}>Chapter Complete</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity style={styles.button} onPress={playStreakMilestone}>
+					<Text style={styles.buttonText}>Streak Milestone</Text>
 				</TouchableOpacity>
 			</View>
 
@@ -275,6 +327,24 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		lineHeight: 20,
 		color: "#666",
+	},
+	sectionTitle: {
+		fontSize: 18,
+		fontWeight: "bold",
+		marginBottom: 10,
+		marginTop: 20,
+		color: "#333",
+	},
+	section: {
+		backgroundColor: "#fff",
+		padding: 15,
+		borderRadius: 10,
+		marginBottom: 20,
+		elevation: 2,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
 	},
 });
 
