@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build French Learning App",
+			"type": "shell",
+			"command": "npx expo start --no-dev --minify",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": ["$tsc"]
+		}
+	]
+}
