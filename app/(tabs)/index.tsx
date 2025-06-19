@@ -161,19 +161,9 @@ export default function Index() {
 		// Each chapter typically has 4 lessons (vocabulary, exercises, games, assessment)
 		const totalLessons = chapterProgress?.totalLessons || 4;
 		const completedLessons = chapterLessons.length;
-
 		const progressPercentage = Math.round(
 			(completedLessons / totalLessons) * 100
 		);
-
-		console.log("Chapter Progress Debug:", {
-			currentChapterNum,
-			chapterProgress,
-			chapterLessons,
-			completedLessons,
-			totalLessons,
-			progressPercentage,
-		});
 
 		return {
 			number: currentChapterNum,
@@ -426,10 +416,10 @@ export default function Index() {
 								style={[styles.challengeButtonText, { color: colors.primary }]}
 							>
 								{challenges[0].completed ? "Completed! 🎉" : "Start Challenge"}
-							</Text>
+							</Text>{" "}
 						</TouchableOpacity>
 					</View>
-				)}{" "}
+				)}
 				{/* Continue Learning */}
 				<View style={styles.continueSection}>
 					<Text style={[styles.sectionTitle, { color: colors.text }]}>
