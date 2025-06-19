@@ -171,24 +171,37 @@ export default function Index() {
 			emoji: ["🇫🇷", "🔢", "👨‍👩‍👧‍👦", "💼", "🎉"][currentChapterNum - 1] || "🇫🇷",
 			progress: progressPercentage,
 		};
-	};
-	// Enhanced user stats with unified data
+	}; // Enhanced user stats with unified data
 	const getUnifiedUserStats = () => {
-		const totalXP = user?.totalXP || userProgress?.totalXP || 0;
-		const level =
-			user?.level || userProgress?.level || Math.floor(totalXP / 200) + 1;
-		// Calculate current level XP and XP needed for next level
-		const currentLevelXP = totalXP % 200;
+		const totalXP = userProgress?.totalXP || user?.totalXP || 0;
+
+		// Level calculation: Level 1 = 0-199 XP, Level 2 = 200-399 XP, etc.
+		const level = Math.floor(totalXP / 200) + 1;
+
+		// Current level progress (XP within current level)
+		const currentLevelXP = totalXP % 200; // For display: prioritize userProgress data over user hook data
+		const displayLevel = userProgress?.level || level;
+
+		// Debug logging
+		console.log("Debug User Stats:", {
+			totalXP,
+			level,
+			displayLevel,
+			currentLevelXP,
+			userLevel: user?.level,
+			userProgressLevel: userProgress?.level,
+			userTotalXP: user?.totalXP,
+			userProgressTotalXP: userProgress?.totalXP,
+		});
 
 		return {
-			level,
+			level: displayLevel,
 			totalXP,
-			streak: user?.streak || userProgress?.streak || 0,
+			streak: userProgress?.streak || user?.streak || 0,
 			currentXP: currentLevelXP,
 			xpToNextLevel: 200, // Total XP needed for next level
-			completedChapters: Object.values(
-				userProgress?.chaptersProgress || {}
-			).filter((ch) => ch.completedAt).length,
+			completedChapters: Object.keys(userProgress?.chaptersProgress || {})
+				.length, // Count chapters that have been unlocked/started
 		};
 	};
 	// Get user achievements and milestones

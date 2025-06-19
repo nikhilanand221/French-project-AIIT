@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../../../constants/Colors";
+import { useProgress } from "../../../contexts/ProgressContext";
 import { chapter2Data } from "../../../data/chapter2/content";
 import { useColorScheme } from "../../../hooks/useColorScheme";
 
@@ -18,6 +19,7 @@ export default function Chapter2Assessment() {
 	const router = useRouter();
 	const colorScheme = useColorScheme();
 	const colors = Colors[colorScheme ?? "light"];
+	const { updateLessonProgress, addXP, unlockChapter } = useProgress();
 
 	const [currentQuestion, setCurrentQuestion] = useState(0);
 	const [answers, setAnswers] = useState<{ [key: number]: string | number }>(
@@ -63,11 +65,40 @@ export default function Chapter2Assessment() {
 				correctAnswers++;
 			}
 		});
-
 		totalScore = Math.round((correctAnswers / questions.length) * 100);
 		setScore(totalScore);
 		setShowResults(true);
-	}, [answers, questions]);
+
+		// Update progress system
+		const passed = totalScore >= 70;
+		const isPerfect = totalScore === 100;
+		const xpAmount = isPerfect ? 60 : passed ? 50 : 30;
+
+		// Update lesson progress
+		updateLessonProgress({
+			lessonId: "assessment",
+			chapterId: "chapter2",
+			completed: passed,
+			score: totalScore,
+			timeSpent: 600 - timeLeft, // Time spent in seconds
+			attempts: 1,
+		});
+
+		// Add XP
+		addXP(xpAmount);
+
+		// Unlock next chapter if assessment passed
+		if (passed) {
+			unlockChapter("chapter3");
+		}
+	}, [
+		answers,
+		questions,
+		timeLeft,
+		updateLessonProgress,
+		addXP,
+		unlockChapter,
+	]);
 
 	// Timer effect
 	React.useEffect(() => {

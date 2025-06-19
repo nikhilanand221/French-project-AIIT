@@ -51,7 +51,7 @@ export default function AssessmentScreen() {
 	const colorScheme = useColorScheme();
 	const colors = Colors[colorScheme ?? "light"];
 	const router = useRouter();
-	const { updateLessonProgress, addXP } = useProgress();
+	const { updateLessonProgress, addXP, unlockChapter } = useProgress();
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 	const [answers, setAnswers] = useState<string[]>([]);
@@ -121,9 +121,13 @@ export default function AssessmentScreen() {
 			timeSpent: 0, // Could track actual time spent
 			attempts: 1,
 		});
-
 		// Add XP
 		await addXP(xpAmount);
+
+		// Unlock next chapter if assessment passed
+		if (passed) {
+			await unlockChapter("chapter2");
+		}
 
 		// Show celebration
 		setShowCelebration(true);

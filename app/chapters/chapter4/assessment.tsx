@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	ScrollView,
 	StyleSheet,
@@ -127,7 +127,7 @@ const assessmentData = {
 };
 
 export default function AssessmentScreen() {
-	const { updateLessonProgress, addXP } = useProgress();
+	const { updateLessonProgress, addXP, unlockChapter } = useProgress();
 	const [currentQuestion, setCurrentQuestion] = useState(0);
 	const [selectedAnswers, setSelectedAnswers] = useState<{
 		[key: number]: string;
@@ -188,10 +188,11 @@ export default function AssessmentScreen() {
 			timeSpent,
 			attempts: 1,
 		});
-
 		await addXP(xpGained);
 
 		if (percentage >= 70) {
+			// Unlock next chapter if assessment passed
+			await unlockChapter("chapter5");
 			setShowCelebration(true);
 		}
 	};

@@ -66,12 +66,36 @@ export default function Chapters() {
 	const { userProgress } = useProgress();
 	// Calculate real progress data
 	const unlockedChapters = Object.keys(userProgress.chaptersProgress).length;
-	const totalXP = userProgress.totalXP;
-	// Create chapters with real progress data
+	const totalXP = userProgress.totalXP; // Create chapters with real progress data
 	const chaptersWithProgress = chapters.map((chapter) => {
 		const chapterProgress =
 			userProgress.chaptersProgress[`chapter${chapter.id}`];
-		const isUnlocked = chapterProgress !== undefined || chapter.id === 1; // Chapter 1 is always unlocked
+
+		// Chapter unlocking logic
+		let isUnlocked = false;
+		if (chapter.id === 1) {
+			// Chapter 1 is always unlocked
+			isUnlocked = true;
+		} else {
+			// Check if the current chapter has progress (meaning it was unlocked)
+			if (chapterProgress !== undefined) {
+				isUnlocked = true;
+			} else {
+				// Check if previous chapter assessment was completed
+				const previousAssessmentKey = Object.keys(
+					userProgress.lessonsProgress
+				).find(
+					(key) =>
+						userProgress.lessonsProgress[key].lessonId === "assessment" &&
+						userProgress.lessonsProgress[key].chapterId ===
+							`chapter${chapter.id - 1}` &&
+						userProgress.lessonsProgress[key].completed
+				);
+				if (previousAssessmentKey) {
+					isUnlocked = true;
+				}
+			}
+		}
 
 		let progress = 0;
 		let earnedXP = 0;
