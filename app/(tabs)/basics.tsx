@@ -33,6 +33,13 @@ export default function basics() {
          </View>
         </Link>
 
+         <Link href="/basics/syllable" style={styles.box}>
+         <View >
+            <MaterialCommunityIcons name="division" size={40} color="black" />
+           <Text style={styles.boxtext}>Syllable Division</Text>
+         </View>
+        </Link>
+
      </ScrollView>
     </View>
   )
