@@ -7,6 +7,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', 
     backgroundColor: '#fff',
   },
+
   box: {
     width: 350,
     height: 100,
@@ -15,6 +16,16 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 10,
   },
+
+  boxtext: {
+    fontSize: 16,
+  },
+
+  icon: {
+    flexDirection: 'row'
+  }
+
+
 
 });
 

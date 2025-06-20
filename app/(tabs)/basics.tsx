@@ -1,3 +1,4 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Link } from 'expo-router';
 import React from 'react';
@@ -11,16 +12,27 @@ export default function basics() {
        <Link href="/basics/abcd" style={styles.box}>
          <View >
            <MaterialIcons name="abc" size={40} color="black"/> 
-           <Text>Learn French Alphabet & Pronunciation</Text>
+           <Text style={styles.boxtext}>French Alphabet & Pronunciation</Text>
          </View>
         </Link>
 
          <Link href="/basics/numbers" style={styles.box}>
          <View >
            <MaterialIcons name="123" size={40} color="black"/> 
-           <Text>Learn French Numbers and Pronunciation</Text>
+           <Text style={styles.boxtext}>French Numbers and Pronunciation</Text>
          </View>
         </Link>
+
+         <Link href="/basics/pronouns" style={styles.box}>
+         <View >
+            <View style={styles.icon}>
+             <MaterialCommunityIcons name="gender-male" size={30} color="black" />
+             <MaterialCommunityIcons name="gender-female" size={30} color="black" />
+            </View>
+           <Text style={[styles.boxtext,{ paddingTop: 10}]}>French Pronouns</Text>
+         </View>
+        </Link>
+
      </ScrollView>
     </View>
   )
