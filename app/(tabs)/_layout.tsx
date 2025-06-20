@@ -13,8 +13,8 @@ export default function TabsLayout() {
             title: "Basics"
         }} />
 
-        <Tabs.Screen name="grammer" options={{
-            tabBarLabel: "Grammer",
+        <Tabs.Screen name="grammar" options={{
+            tabBarLabel: "Grammar",
             tabBarIcon: () => (
                 <MaterialIcons name="spellcheck" size={24} color="black" />
             ),

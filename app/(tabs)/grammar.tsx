@@ -2,10 +2,10 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import styles from '../styles/tabStyle';
 
-export default function practice() {
+export default function grammer() {
   return (
     <View style={styles.container}>
-      <Text>practice</Text>
+      <Text>grammar</Text>
     </View>
   )
 }
