@@ -23,6 +23,12 @@ const styles = StyleSheet.create({
 
   icon: {
     flexDirection: 'row'
+  },
+
+  subTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    padding: 10,
   }
 
 

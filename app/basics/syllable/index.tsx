@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
-export default function index() {
+export default function SyllableDivisionScreen() {
   return (
     <ScrollView contentContainerStyle={styles.scrollViewContent}>
       <Stack.Screen options={{ title: 'Syllable Division' }} />
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
 
   infoText: {
-    fontSize: 12,
+    fontSize: 16,
     color: '#888',
   },
 
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
 
   syllableIntentionTitle: {
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
     textAlign: 'center',
@@ -120,14 +120,14 @@ const styles = StyleSheet.create({
   },
 
   syllableIntentionText: {
-    fontSize: 13,
+    fontSize: 16,
     textAlign: 'justify',
-    lineHeight: 18,
+    lineHeight: 24,
     color: '#333',
   },
 
   ruleTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
     marginTop: 15,
     marginBottom: 5,
@@ -135,13 +135,13 @@ const styles = StyleSheet.create({
   },
 
   ruleText: {
-    fontSize: 14,
+    fontSize: 16,
     marginBottom: 5,
     width: '100%',
   },
 
   exampleText: {
-    fontSize: 13,
+    fontSize: 16,
     fontStyle: 'italic',
     marginBottom: 10,
     marginLeft: 10,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
 
   noteText: {
-    fontSize: 12,
+    fontSize: 16,
     marginTop: 20,
     fontStyle: 'italic',
     textAlign: 'center',
