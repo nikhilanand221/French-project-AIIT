@@ -1,8 +1,9 @@
+import Foundation from '@expo/vector-icons/Foundation';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Link } from 'expo-router';
 import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View, } from 'react-native';
 import styles from '../styles/tabStyle';
 
 export default function basics() {
@@ -33,6 +34,16 @@ export default function basics() {
          </View>
         </Link>
 
+        <Text style={styles.subTitle}>Pronounciation Basics:</Text>
+
+          <Link href="/basics/nasal" style={styles.box}>
+         <View >
+          <Foundation name="sound" size={40} color="black" />
+           <Text style={[styles.boxtext,{ paddingTop: 10}]}>Nasal Sounds</Text>
+         </View>
+        </Link>
+
+
          <Link href="/basics/syllable" style={styles.box}>
          <View >
             <MaterialCommunityIcons name="division" size={40} color="black" />
@@ -44,4 +55,3 @@ export default function basics() {
     </View>
   )
 }
-

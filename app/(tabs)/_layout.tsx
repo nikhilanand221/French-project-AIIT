@@ -1,7 +1,18 @@
-//TODO: make it prettier
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs } from "expo-router";
+import { Text, View } from 'react-native';
+import AmityUniversitySvg from '../../assets/images/AmityUniversity.svg';
+
+function CustomHeader() {
+    return (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <AmityUniversitySvg width={70} height={70} />
+            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>French For Beginners</Text>
+        </View>
+    );
+}
+
 
 export default function TabsLayout() {
     return <Tabs>
@@ -10,7 +21,7 @@ export default function TabsLayout() {
             tabBarIcon: () => (
                 <MaterialIcons name="abc" size={24} color="black" />
             ),
-            title: "Basics"
+            headerTitle: () => <CustomHeader />
         }} />
 
         <Tabs.Screen name="grammar" options={{
@@ -18,7 +29,8 @@ export default function TabsLayout() {
             tabBarIcon: () => (
                 <MaterialIcons name="spellcheck" size={24} color="black" />
             ),
-            title: "Grammer"
+            headerTitle: () => <CustomHeader />
+            
         }}/>
 
         <Tabs.Screen name="practice" options={{
@@ -26,7 +38,8 @@ export default function TabsLayout() {
             tabBarIcon: () => (
                 <FontAwesome6 name="users-gear" size={24} color="black" />
             ),
-            title: "Practice"
+            headerTitle: () => <CustomHeader />
+            
         }}/>
 
         <Tabs.Screen name="tipsAndTricks" options={{
@@ -34,7 +47,8 @@ export default function TabsLayout() {
             tabBarIcon: () => (
                 <MaterialIcons name="lightbulb" size={24} color="black" />
             ),
-            title: "Tips and Tricks"
+            headerTitle: () => <CustomHeader />
+            
         }}/>
 
     </Tabs>;
