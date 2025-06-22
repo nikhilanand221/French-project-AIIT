@@ -17,6 +17,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 
+  boxTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+
   boxtext: {
     fontSize: 16,
   },
