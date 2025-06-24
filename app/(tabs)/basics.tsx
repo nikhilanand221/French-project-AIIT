@@ -1,4 +1,5 @@
 import Foundation from '@expo/vector-icons/Foundation';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Link } from 'expo-router';
@@ -8,8 +9,8 @@ import styles from '../styles/tabStyle';
 
 export default function basics() {
   return (
-    <View style={styles.container}> 
-     <ScrollView style={{ paddingVertical: 10}}>
+
+     <ScrollView contentContainerStyle={styles.scrollViewContent}>
        <Link href="/basics/abcd" style={styles.box}>
          <View >
            <MaterialIcons name="abc" size={40} color="black"/> 
@@ -51,7 +52,16 @@ export default function basics() {
          </View>
         </Link>
 
+        <Text style={styles.subTitle}>Basic Phrases:</Text>
+
+        <Link href="/basics/phrases" style={styles.box}>
+         <View >
+          <Ionicons name="person-sharp" size={40} color="black" />
+           <Text style={styles.boxtext}>Basic French Phrases</Text>
+         </View>
+        </Link>
+
      </ScrollView>
-    </View>
+
   )
 }
