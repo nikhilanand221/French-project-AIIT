@@ -1,12 +1,12 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 import styles from '../styles/tabStyle';
 
 export default function practice() {
   return (
-    <View style={styles.container}>
-      <Text>practice</Text>
-    </View>
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <Text>Under Construction</Text>
+    </ScrollView>
   )
 }
 
