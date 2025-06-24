@@ -9,8 +9,8 @@ import styles from '../styles/tabStyle';
 
 export default function grammer() {
   return (
-    <View style={styles.container}>
-      <ScrollView style={{ paddingVertical: 10}}>
+
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
 
         <Link href="/grammar/pronominal" style={styles.box}>
          <View >
@@ -48,7 +48,6 @@ export default function grammer() {
         </Link>
      
       </ScrollView>
-    </View>
   )
 }
 

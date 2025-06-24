@@ -1,11 +1,12 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1, 
+scrollViewContent: {
+    flexGrow: 1,
     alignItems: 'center',
-    justifyContent: 'center', 
-    backgroundColor: '#fff',
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+    backgroundColor: 'white'
   },
 
   box: {
